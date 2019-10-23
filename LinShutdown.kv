@@ -1,0 +1,282 @@
+__author__ = 'WutDuk? https://github.com/jcemerson'
+__date__ = '20191023'
+__version__ = '1.0'
+__description__ = """
+    The Linux version of WinShutdown.
+"""
+
+<LinShutdownTimer>:
+    rows: 7
+    cols: 1
+    padding: root.widget_padding
+    canvas.before:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: '.\Images\Brushed_Metal_WM.png'
+
+    GridLayout:
+        id: cmd_group
+        rows: 2
+        cols: 7
+        size_hint_y: None
+        height: 70
+        padding: root.widget_padding
+        ToggleButton:
+            id: shutdown
+            text: '[u]S[/u]hutdown'
+            font_size: root.font_size
+            state: 'down'
+            group: 'cmd'
+            markup: True
+            disabled: root.preset_disabled
+            allow_no_selection: False
+        Label:
+            size_hint_x: None
+            width: root.spacer_width
+        ToggleButton:
+            id: restart
+            text: '[u]R[/u]estart'
+            font_size: root.font_size
+            state: 'normal'
+            group: 'cmd'
+            markup: True
+            disabled: root.preset_disabled
+            allow_no_selection: False
+        Label:
+            size_hint_x: None
+            width: root.spacer_width
+        ToggleButton:
+            id: hibernate
+            text: '[u]H[/u]ibernate'
+            font_size: root.font_size
+            state: 'normal'
+            group: 'cmd'
+            markup: True
+            disabled: root.preset_disabled
+            allow_no_selection: False
+        Label:
+            size_hint_x: None
+            width: root.spacer_width
+        ToggleButton:
+            id: logoff
+            text: '[u]L[/u]og Off'
+            font_size: root.font_size
+            state: 'normal'
+            group: 'cmd'
+            markup: True
+            allow_no_selection: False
+            disabled: root.preset_disabled
+
+    GridLayout:
+        rows: 2
+        cols: 9
+        size_hint_y: None
+        height: 70
+        padding: root.widget_padding
+        # Instead of having to repeat the same values for every button, we can just use a template instead: https://kivy.org/doc/stable/guide/lang.html
+        ToggleButton:
+            id: set20
+            text: '[u]2[/u]0 min'
+            font_size: root.font_size
+            group: 'preset_duration'
+            markup: True
+            disabled: root.preset_disabled
+            allow_no_selection: False
+            on_release: root.clear_timer(), root.set_timer( 20 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+        Label:
+            size_hint_x: None
+            width: root.spacer_width
+        ToggleButton:
+            id: set40
+            text: '[u]4[/u]0 min'
+            font_size: root.font_size
+            group: 'preset_duration'
+            markup: True
+            disabled: root.preset_disabled
+            allow_no_selection: False
+            on_release: root.clear_timer(), root.set_timer( 40 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+        Label:
+            size_hint_x: None
+            width: root.spacer_width
+        ToggleButton:
+            id: set60
+            text: '[u]6[/u]0 min'
+            font_size: root.font_size
+            group: 'preset_duration'
+            markup: True
+            disabled: root.preset_disabled
+            allow_no_selection: False
+            on_release: root.clear_timer(), root.set_timer( 60 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+        Label:
+            size_hint_x: None
+            width: root.spacer_width
+        ToggleButton:
+            id: set90
+            text: '[u]9[/u]0 min'
+            font_size: root.font_size
+            group: 'preset_duration'
+            markup: True
+            disabled: root.preset_disabled
+            allow_no_selection: False
+            on_release: root.clear_timer(), root.set_timer( 90 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+        Label:
+            size_hint_x: None
+            width: root.spacer_width
+        ToggleButton:
+            id: set120
+            text: '[u]1[/u]20 min'
+            font_size: root.font_size
+            group: 'preset_duration'
+            markup: True
+            disabled: root.preset_disabled
+            allow_no_selection: False
+            on_release: root.clear_timer(), root.set_timer( 120 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+
+    GridLayout:
+        rows: 1
+        cols: 5
+        size_hint_y: None
+        height: 70
+        padding: root.widget_padding
+        Label:
+            size_hint_x: None
+            width: 200
+        Button:
+            id: minus15
+            text: '[u]-[/u] 15 min'
+            font_size: root.font_size
+            size_hint: 0.7, 0.4
+            markup: True
+            disabled: root.sub_time_disabled
+            on_release: root.sub_time( 15 * 60 ), root.toggle_start_pause_status(),  root.toggle_preset_state()#, root.update_hover_text()
+        Label:
+            size_hint_x: None
+            width: root.spacer_width
+        Button:
+            id: plus15
+            text: '[u]+[/u] 15 min'
+            font_size: root.font_size
+            size_hint: 0.7, 0.4
+            disabled: root.add_time_disabled
+            markup: True
+            on_release: root.add_time( 15 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+        Label:
+            size_hint_x: None
+            width: 200
+
+    GridLayout:
+        rows: 1
+        cols: 1
+        Label:
+            text: "{:02d}:{:02d}:{:02d}".format( int( divmod( divmod( root.countdown, 60 )[ 0 ] , 60 )[ 0 ] ), int( divmod( divmod( root.countdown, 60 )[ 0 ], 60 )[ 1 ] ), int( divmod( root.countdown, 60 )[ 1 ] ) )
+            font_size: 100
+
+    BoxLayout:
+        padding: 70, 0, 70, 15
+        ToggleButton:
+            id: start_pause
+            text: root.start_pause
+            font_size: root.font_size + 10
+            size_hint: 0.7, 0.4
+            state: 'normal'
+            disabled: root.start_pause_disabled
+            on_release: root.start_stop_timer(), root.toggle_start_pause_text(), root.toggle_start_pause_status(), root.toggle_preset_status(), root.toggle_abort_status(),  root.toggle_preset_state()#, root.update_hover_text()
+        Label:
+            size_hint_x: None
+            width: root.spacer_width
+        Button:
+            id: abort
+            text: '[u]A[/u]bort'
+            font_size: root.font_size + 10
+            size_hint: 0.7, 0.4
+            background_color: root.abort_background_color
+            markup: True
+            disabled: root.abort_disabled
+            on_release: root.reset()
+
+
+
+<ImminentPopup>:
+    canvas.before:
+        Color:
+            rgba:  [ 47 / 255., 167 / 255., 212 / 255., 1. ]
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    title_size: 30
+    title_align: 'center'
+    size_hint: 0.8, 0.8
+    auto_dismiss: False
+    pos_hint: { 'x' : 0.1 , 'y' : 0.1 }
+
+    GridLayout:
+        cols: 1
+        rows: 2
+        spacing: 15
+        padding: 15
+        Label:
+            id: content
+            text: root.label_text
+            markup: True
+            font_size: 25
+            padding: 15, 25
+            size_hint_y: None
+            text_size: self.width, None
+            height: self.texture_size[ 1 ]
+            halign: 'center'
+
+        GridLayout:
+            cols: 2
+            rows: 1
+
+            AnchorLayout:
+                anchor_x : 'center'
+                anchor_y : 'bottom'
+                padding: 20
+                Button:
+                    id: yes
+                    text: '[u]Y[/u]es'
+                    markup: True
+                    font_size: 30
+                    size_hint: 1, 0.8
+                    on_release: app.root.popup_yes(), app.root.imminent_popup.dismiss()
+
+            AnchorLayout:
+                anchor_x : 'center'
+                anchor_y : 'bottom'
+                padding: 20
+                Button:
+                    id: no
+                    text: '[u]N[/u]o'
+                    markup: True
+                    font_size: 30
+                    size_hint: 1, 0.8
+                    on_release: app.root.popup_no(), app.root.imminent_popup.dismiss()
+
+
+
+<FinalPopup>:
+    canvas.before:
+        Color:
+            rgba:  [ 47 / 255., 167 / 255., 212 / 255., 1. ]
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    title: 'App closing in: {:01d}'.format( int( root.countdown ) )
+    title_size: 30
+    title_align: 'center'
+    size_hint: 0.6, 0.6
+    auto_dismiss: False
+    pos_hint: { 'x' : 0.2 , 'y' : 0.2 }
+
+    BoxLayout:
+        Label:
+            text: "Thank you for using LinShutdown for all your Shutting-downy needs.\n\nGoodbye..."
+            font_size: 25
+            size_hint_y: None
+            text_size: self.width, None
+            height: self.texture_size[ 1 ]
+            halign: 'center'
+            valign: 'middle'
+            pos_hint: { 'x': 0  , 'y' : 0.4 }
