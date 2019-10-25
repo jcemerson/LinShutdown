@@ -1,9 +1,9 @@
-__author__ = 'WutDuk? https://github.com/jcemerson'
-__date__ = '20191023'
-__version__ = '1.0'
-__description__ = """
-    The Linux version of WinShutdown.
-"""
+# __author__ = 'WutDuk? https://github.com/jcemerson'
+# __date__ = '20191023'
+# __version__ = '1.0'
+# __description__ = """
+#     The Linux version of WinShutdown.
+# """
 
 <LinShutdownTimer>:
     rows: 7
@@ -13,7 +13,7 @@ __description__ = """
         Rectangle:
             pos: self.pos
             size: self.size
-            source: '.\Images\Brushed_Metal_WM.png'
+            source: './Images/Brushed_Metal_WM.png'
 
     GridLayout:
         id: cmd_group
@@ -47,8 +47,8 @@ __description__ = """
             size_hint_x: None
             width: root.spacer_width
         ToggleButton:
-            id: hibernate
-            text: '[u]H[/u]ibernate'
+            id: suspend
+            text: 'Sus[u]p[/u]end'
             font_size: root.font_size
             state: 'normal'
             group: 'cmd'
