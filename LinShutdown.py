@@ -6,24 +6,9 @@ __description__ = """
 """
 
 
-# Redirect stderr to support use of pythonw.exe in order to run without cmd console
 import sys
 import os
-
-# if sys.executable.endswith("pythonw.exe"):
-#     sys.stdout = open(os.devnull, "w")
-#     sys.stderr = open(
-#         os.path.join(os.getenv("TEMP"),
-#         "stderr-" + os.path.basename(sys.argv[0])),
-#         "w"
-#     )
-
-# Import required modules
-# import KivyConfigCheck
-# import ctypes
-# import subprocess
 import kivy
-# from infi.systray import SysTrayIcon
 from kivy import Config
 from kivy.app import App
 from kivy.uix.label import Label
@@ -39,18 +24,13 @@ from kivy.properties import NumericProperty
 from kivy.properties import BooleanProperty
 from kivy.properties import ListProperty
 from kivy.clock import Clock
+# import tray as systray
 
 
 # Supported Kivy version required for operation. Older version may work too,
 # but they're not supported. You can remove or modify this setting at your own
 # risk.
 kivy.require('1.10.1')
-
-
-# # Script to update settings for Windows 10 issues --
-# See KivyConfigCheck.py for details
-# KivyConfigCheck.WindowsCheck()
-
 
 # Set config.ini setting for this instance of the app only
 # (as opposed to writing to the file which would impact ALL Kivy apps)
@@ -72,7 +52,7 @@ Config.set(
 Config.set(
     'kivy',
     'window_icon',
-    './Images/power-on.png'
+    './Images/power-on-white.png'
 )
 
 
@@ -113,7 +93,6 @@ class FinalPopup(Popup):
         self.anim.start(self)
 
 
-
 # Main Class defining overall functions of the App
 class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     # Define default layout and widget attributes
@@ -127,67 +106,84 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     preset_disabled = BooleanProperty(False)
     abort_disabled = BooleanProperty(True)
     countdown = NumericProperty(0)
-    abort_background_color = ListProperty([ 1, 1, 1, 1 ])
+    abort_background_color = ListProperty([1, 1, 1, 1])
     popup_active = BooleanProperty(False)
 
 
     def __init__(self):
         super(LinShutdownTimer, self).__init__()
 
-    # Set keybindings -- I'm not exactly sure what "arg" is capturing,
-    # I just know I needed to capture the argument for this to work
-    def key_action(self, keyboard, keycode, arg, text, modifiers):
-        # print(keycode, text, modifiers, arg) # Uncomment to see values to
-        # define new keybindings
+    #     self.systray = systray
+    #
+    #     # Context Menu Options
+    #     def on_quit(systray):
+    #         App.get_running_app().stop()
+    #
+    #     # Bind to closing the window
+    #     Window.bind(on_close = self.close_systray)
+    #
+    # # Close system tray icon
+    # def close_systray(self, *args):
+    #     self.systray.shutdown()
+
+        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+        self._keyboard.bind(on_key_down=self._on_keyboard_down)
+
+    def _keyboard_closed(self):
+        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+        self._keyboard = None
+
+
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
         if self.preset_disabled == False:
             # cmd buttons
-            if keycode == 115 and text == 's' and modifiers == []:
+            if keycode[0] == 115:
                 self.ids.shutdown.trigger_action(0)
-            elif keycode == 114 and text == 'r' and modifiers == []:
+            elif keycode[0] == 114:
                 self.ids.restart.trigger_action(0)
-            elif keycode == 112 and text == 'p' and modifiers == []:
+            elif keycode[0] == 112:
                 self.ids.suspend.trigger_action(0)
-            elif keycode == 108 and text == 'l' and modifiers == []:
+            elif keycode[0] == 108:
                 self.ids.logoff.trigger_action(0)
             # preset duration buttons
-            elif keycode == 50 and text == '2' and modifiers == []:
+            elif keycode[0] == 50:
                 self.ids.set20.trigger_action(0)
-            elif keycode == 52 and text == '4' and modifiers == []:
+            elif keycode[0] == 52:
                 self.ids.set40.trigger_action(0)
-            elif keycode == 54 and text == '6' and modifiers == []:
+            elif keycode[0] == 54:
                 self.ids.set60.trigger_action(0)
-            elif keycode == 57 and text == '9' and modifiers == []:
+            elif keycode[0] == 57:
                 self.ids.set90.trigger_action(0)
-            elif keycode == 49 and text == '1' and modifiers == []:
+            elif keycode[0] == 49:
                 self.ids.set120.trigger_action(0)
 
         # subtract time / add time buttons
         if self.sub_time_disabled == False:
-            if (keycode == 276 or keycode == 274 and text == None and modifiers == []) or (keycode == 45 and text == '-' and modifiers == []) or (keycode == 269 and text == 'č' and modifiers == []):
+            if keycode[0] in (45, 269, 274, 276):
                 self.ids.minus15.trigger_action(0)
 
         if self.add_time_disabled == False:
-            if (keycode == 275 or keycode == 273 and text == None and modifiers == []) or (keycode == 61 and text == '=' and modifiers == [ 'shift' ]) or (keycode == 270 and text == 'Ď' and modifiers == []):
+            if keycode[0] in (61, 270, 273, 275):
                 self.ids.plus15.trigger_action(0)
 
         # If there's no active popup, then
         if self.popup_active == False:
             # Start/Stop buttons
             if self.countdown > 0 and self.start_pause_disabled == False:
-                if (keycode == 32 and text == ' ' and modifiers == []) or ((keycode == 13 or keycode == 271) and text == None and modifiers == []):
+                if keycode[0] in (13, 16, 32, 271):
                     self.ids.start_pause.trigger_action(0)
 
             # Abort button
             if  self.abort_disabled == False:
-                if keycode == 97 and text == 'a' and modifiers == [ 'ctrl' ]:
+                if keycode[0] == 97:
                     self.ids.abort.trigger_action(0)
 
         # If there is an active popop, then
         if self.popup_active == True:
             # ImminentPopup Yes/No buttons
-            if keycode == 121 and text == 'y' and modifiers == []:
+            if keycode[0] == 121:
                 self.imminent_popup.ids.yes.trigger_action(0)
-            elif keycode == 110 and text == 'n' and modifiers == []:
+            elif keycode[0] == 110:
                 self.imminent_popup.ids.no.trigger_action(0)
 
 
@@ -227,7 +223,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
                 final_cmd = 'systemctl suspend'
             # Else, if none of the above, compile a cmd string for logoff
             else:
-                final_cmd = 'gnome-session-save --force-logout'
+                final_cmd = 'gnome-session-quit --force'
             # # send final cmd to windows cmd shell
             os.system(final_cmd)
             # Instantiate and open the final popup then start final timer
@@ -296,11 +292,11 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
         if self.countdown > 0 and self.ids.start_pause.state == 'down':
             # The Abort button is active, and colored red
             self.abort_disabled = False
-            self.abort_background_color = [ 1, 0, 0, 1 ]
+            self.abort_background_color = [1, 0, 0, 1]
         # Else the button is disabled and returns to default gray
         else:
             self.abort_disabled = True
-            self.abort_background_color = [ 1, 1, 1, 1 ]
+            self.abort_background_color = [1, 1, 1, 1]
 
 
     # Function to toggle the status of preset time buttons
@@ -455,7 +451,7 @@ class LinShutdownApp(App):
 
     def build(self):
         shutdown_timer = LinShutdownTimer()
-        # shutdown_timer.systray.start()
+        # shutdown_timer.systray.main()
         return shutdown_timer
 
 
