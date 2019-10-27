@@ -1,5 +1,11 @@
-Log-Off command doesn't work
-Window Icon not showing
-    --Get new Icon file from
-Keybindings not working
+Window Icon (title bar) not showing
+    Syntax appears to be correct. Is this related to Linux and/or Theme?
+
 Test wall command using "systemctl [cmd] [wall command]"
+
+Add config file and UI options
+
+Windows SysTray doesn't work (obviously), and new SysTray using gi.repository.AppIndicator3 "freezes" the app prior to loading the UI.
+    Need to find suitable SysTray functionality.
+
+CLEAN UP CODE! Ru linter and follow suggestions.
