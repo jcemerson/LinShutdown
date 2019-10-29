@@ -8,6 +8,8 @@ __description__ = """
 
 import sys
 import os
+import json
+import ast
 import kivy
 from kivy import Config
 from kivy.app import App
@@ -64,6 +66,10 @@ Window.size = (800, 600)
 Window.fullscreen = False
 
 
+# Get the current file path:
+file_path = os.path.dirname(os.path.realpath(__file__))
+
+
 # Class defining popup presented when User forces countdown to 0
 class ImminentPopup(Popup):
 
@@ -100,6 +106,16 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     widget_padding = (25, 10, 25, 10)
     spacer_width = 10
     start_pause = StringProperty('Start')
+    set20_disabled = BooleanProperty(True)
+    set20_state = BooleanProperty(True)
+    set40_disabled = BooleanProperty(True)
+    set40_state = BooleanProperty(True)
+    set60_disabled = BooleanProperty(True)
+    set60_state = BooleanProperty(True)
+    set90_disabled = BooleanProperty(True)
+    set90_state = BooleanProperty(True)
+    set120_disabled = BooleanProperty(True)
+    set120_state = BooleanProperty(True)
     start_pause_disabled = BooleanProperty(True)
     sub_time_disabled = BooleanProperty(True)
     add_time_disabled = BooleanProperty(False)
@@ -108,10 +124,22 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     countdown = NumericProperty(0)
     abort_background_color = ListProperty([1, 1, 1, 1])
     popup_active = BooleanProperty(False)
+    settings = {
+        "default_cmd": "shutdown",
+        "default_time": None,
+    }
+
+    self.get_app_settings()
+    def_cmd = self.settings['default_cmd']
+    def_time = self.settings['default_time']
 
 
     def __init__(self):
         super(LinShutdownTimer, self).__init__()
+
+        # self.get_app_settings()
+        # self.ids.def_cmd.state = 'down'
+        # self.ids.def_time.state == 'down'
 
     #     self.systray = systray
     #
@@ -128,6 +156,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
+
 
     def _keyboard_closed(self):
         self._keyboard.unbind(on_key_down=self._on_keyboard_down)
@@ -187,6 +216,23 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
                 self.imminent_popup.ids.no.trigger_action(0)
 
 
+    def get_curr_settings(self):
+        self.settings['default_cmd'] = self.get_cmd().lower()
+        self.settings['default_time'] = self.get_time()
+
+
+    def set_app_settings(self):
+        settings_file = file_path + '/' + 'settings.json'
+        with open(settings_file, 'w+') as f:
+            json.dump(self.settings, f)
+
+
+    def get_app_settings(self):
+        settings_file = file_path + '/' + 'settings.json'
+        with open(settings_file, 'r') as f:
+            settings_json = ast.literal_eval(f.read())
+
+
     # Function to set the current cmd value
     def get_cmd(self):
         if self.ids.shutdown.state == 'down':
@@ -200,11 +246,25 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
         return self.cmd
 
 
+    def get_time(self):
+        if self.ids.set20.state == 'down':
+            self.time = 'set20'
+        elif self.ids.set40.state == 'down':
+            self.time = 'set40'
+        elif self.ids.set60.state == 'down':
+            self.time = 'set60'
+        elif self.ids.set90.state == 'down':
+            self.time = 'set90'
+        else:
+            self.time = 'set120'
+        return self.time
+
+
     # Function called when countdown reaches 0 to execute the selected
     # cmd from the cmd_group togglebuttons
     def initiate_shutdown(self, *args):
         # Custom message to display on screen.
-        wall_cmd = '/c "Automated User-initiated {cmd} via LinShutdown"'
+        # wall_cmd = '/c "Automated User-initiated {cmd} via LinShutdown"'
         # build final cmd
         final_cmd = ''
         # If the Start/Pause button is down (should say 'Pause') and the countdown is at 0, then
@@ -224,13 +284,13 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
             # Else, if none of the above, compile a cmd string for logoff
             else:
                 final_cmd = 'gnome-session-quit --force'
-            # # send final cmd to windows cmd shell
-            os.system(final_cmd)
             # Instantiate and open the final popup then start final timer
             self.final_popup = FinalPopup()
             self.final_popup.open()
             self.popup_active = True
             self.final_popup.start_final_timer()
+            # send final cmd to command shell
+            os.system(final_cmd)
 
 
     # Function to set the countdown timer. This doesn't add time.
@@ -358,10 +418,12 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
         self.get_cmd()
         # Cancel any current animation in progress
         Animation.cancel_all(self)
-        # Define the rules for Animation; i.e., (<where we are going>, <where
-        # we're coming from>)
-        self.anim = Animation(countdown=0,
-                               duration=self.countdown,)
+        # Define the rules for Animation; i.e., (where we are going, where
+        # we're coming from)
+        self.anim = Animation(
+            countdown=0,
+            duration=self.countdown,
+        )
         # on_release of Start/Pause button, if the down and there is still
         # time on the clock, then
         if self.ids.start_pause.state == 'down' and self.countdown > 0:
