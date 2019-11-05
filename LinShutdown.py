@@ -25,6 +25,7 @@ from kivy.properties import StringProperty
 from kivy.properties import NumericProperty
 from kivy.properties import BooleanProperty
 from kivy.properties import ListProperty
+from kivy.properties import AliasProperty
 from kivy.clock import Clock
 # import tray as systray
 
@@ -66,8 +67,10 @@ Window.size = (800, 600)
 Window.fullscreen = False
 
 
-# Get the current file path:
+# Set the path to the user settings file:
 file_path = os.path.dirname(os.path.realpath(__file__))
+filename = 'user_settings.json'
+user_settings_file = file_path + '/' + filename
 
 
 # Class defining popup presented when User forces countdown to 0
@@ -105,57 +108,127 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     font_size = 20
     widget_padding = (25, 10, 25, 10)
     spacer_width = 10
-    start_pause = StringProperty('Start')
-    set20_disabled = BooleanProperty(True)
-    set20_state = BooleanProperty(True)
-    set40_disabled = BooleanProperty(True)
-    set40_state = BooleanProperty(True)
-    set60_disabled = BooleanProperty(True)
-    set60_state = BooleanProperty(True)
-    set90_disabled = BooleanProperty(True)
-    set90_state = BooleanProperty(True)
-    set120_disabled = BooleanProperty(True)
-    set120_state = BooleanProperty(True)
-    start_pause_disabled = BooleanProperty(True)
-    sub_time_disabled = BooleanProperty(True)
-    add_time_disabled = BooleanProperty(False)
-    preset_disabled = BooleanProperty(False)
     abort_disabled = BooleanProperty(True)
-    countdown = NumericProperty(0)
     abort_background_color = ListProperty([1, 1, 1, 1])
     popup_active = BooleanProperty(False)
-    settings = {
-        "default_cmd": "shutdown",
-        "default_time": None,
-    }
 
-    self.get_app_settings()
-    def_cmd = self.settings['default_cmd']
-    def_time = self.settings['default_time']
+    shutdown_btn_disabled = BooleanProperty(False)
+    shutdown_btn_state = StringProperty('normal')
+    restart_btn_disabled = BooleanProperty(False)
+    restart_btn_state = StringProperty('normal')
+    suspend_btn_disabled = BooleanProperty(False)
+    suspend_btn_state = StringProperty('normal')
+    logoff_btn_disabled = BooleanProperty(False)
+    logoff_btn_state = StringProperty('normal')
+
+    set20_disabled = BooleanProperty(False)
+    set20_state = StringProperty('normal')
+    set40_disabled = BooleanProperty(False)
+    set40_state = StringProperty('normal')
+    set60_disabled = BooleanProperty(False)
+    set60_state = StringProperty('normal')
+    set90_disabled = BooleanProperty(False)
+    set90_state = StringProperty('normal')
+    set120_disabled = BooleanProperty(False)
+    set120_state = StringProperty('normal')
+    preset_status = BooleanProperty(True)
+
+    sub_time_disabled = BooleanProperty(True)
+    add_time_disabled = BooleanProperty(False)
+
+    countdown = NumericProperty(0)
+
+    start_pause = StringProperty('Start')
+    start_pause_disabled = BooleanProperty(True)
+
+    # Retrieve default settings if the file exists, else create the file and
+    # set defaults to None.
+    try:
+        with open(user_settings_file, 'r') as f:
+            user_settings = ast.literal_eval(f.read())
+    except FileNotFoundError:
+        user_settings = {
+            "default_cmd": 'shutdown',
+            "default_time": 'set20',
+        }
+        with open(user_settings_file, 'w+') as f:
+            json.dump(user_settings, f, indent=4)
 
 
     def __init__(self):
         super(LinShutdownTimer, self).__init__()
-
-        # self.get_app_settings()
-        # self.ids.def_cmd.state = 'down'
-        # self.ids.def_time.state == 'down'
-
-    #     self.systray = systray
-    #
-    #     # Context Menu Options
-    #     def on_quit(systray):
-    #         App.get_running_app().stop()
-    #
-    #     # Bind to closing the window
-    #     Window.bind(on_close = self.close_systray)
-    #
-    # # Close system tray icon
-    # def close_systray(self, *args):
-    #     self.systray.shutdown()
-
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
+
+
+    def apply_defaults(self):
+        default_cmd = self.user_settings['default_cmd']
+        default_time = self.user_settings['default_time']
+        if default_cmd == 'shutdown':
+            self.shutdown_btn_state = 'down'
+        elif default_cmd == 'restart':
+            self.restart_btn_state = 'down'
+        elif default_cmd == 'suspend':
+            self.suspend_btn_state = 'down'
+        elif default_cmd == 'log off':
+            self.logoff_btn_state = 'down'
+
+        if default_time == 'set20':
+            self.set20_state = 'down'
+            self.countdown = 20*60
+        elif default_time == 'set40':
+            self.set40_state = 'down'
+            self.countdown = 40*60
+        elif default_time == 'set60':
+            self.set60_state = 'down'
+            self.countdown = 60*60
+        elif default_time == 'set90':
+            self.set90_state = 'down'
+            self.countdown = 90*60
+        elif default_time == 'set120':
+            self.set120_state = 'down'
+            self.countdown = 120*60
+
+        self.start_pause_disabled = False
+        self.sub_time_disabled = False
+
+
+    # Function to get the current cmd value
+    def get_cmd(self):
+        if self.ids.shutdown.state == 'down':
+            self.cmd = 'Shutdown'
+        elif self.ids.restart.state == 'down':
+            self.cmd = 'Restart'
+        elif self.ids.suspend.state == 'down':
+            self.cmd = 'Suspend'
+        elif self.ids.logoff.state == 'down':
+            self.cmd = 'Log Off'
+        return self.cmd
+
+
+    # Function to get the current time value
+    def get_time(self):
+        if self.ids.set20.state == 'down':
+            self.time = 'set20'
+        elif self.ids.set40.state == 'down':
+            self.time = 'set40'
+        elif self.ids.set60.state == 'down':
+            self.time = 'set60'
+        elif self.ids.set90.state == 'down':
+            self.time = 'set90'
+        elif self.ids.set120.state == 'down':
+            self.time = 'set120'
+        return self.time
+
+
+    def set_app_settings(self):
+        with open(user_settings_file, 'w+') as f:
+            json.dump(self.user_settings, f, indent=4)
+
+
+    def get_curr_settings(self):
+        self.user_settings['default_cmd'] = self.get_cmd().lower()
+        self.user_settings['default_time'] = self.get_time()
 
 
     def _keyboard_closed(self):
@@ -164,7 +237,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        if self.preset_disabled == False:
+        if self.preset_status == True:
             # cmd buttons
             if keycode[0] == 115:
                 self.ids.shutdown.trigger_action(0)
@@ -175,15 +248,15 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
             elif keycode[0] == 108:
                 self.ids.logoff.trigger_action(0)
             # preset duration buttons
-            elif keycode[0] == 50:
+            elif keycode[0] in (50, 258):
                 self.ids.set20.trigger_action(0)
-            elif keycode[0] == 52:
+            elif keycode[0] in (52, 260):
                 self.ids.set40.trigger_action(0)
-            elif keycode[0] == 54:
+            elif keycode[0] in (54, 262):
                 self.ids.set60.trigger_action(0)
-            elif keycode[0] == 57:
+            elif keycode[0] in (57, 265):
                 self.ids.set90.trigger_action(0)
-            elif keycode[0] == 49:
+            elif keycode[0] in (49, 257):
                 self.ids.set120.trigger_action(0)
 
         # subtract time / add time buttons
@@ -216,50 +289,6 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
                 self.imminent_popup.ids.no.trigger_action(0)
 
 
-    def get_curr_settings(self):
-        self.settings['default_cmd'] = self.get_cmd().lower()
-        self.settings['default_time'] = self.get_time()
-
-
-    def set_app_settings(self):
-        settings_file = file_path + '/' + 'settings.json'
-        with open(settings_file, 'w+') as f:
-            json.dump(self.settings, f)
-
-
-    def get_app_settings(self):
-        settings_file = file_path + '/' + 'settings.json'
-        with open(settings_file, 'r') as f:
-            settings_json = ast.literal_eval(f.read())
-
-
-    # Function to set the current cmd value
-    def get_cmd(self):
-        if self.ids.shutdown.state == 'down':
-            self.cmd = 'Shutdown'
-        elif self.ids.restart.state == 'down':
-            self.cmd = 'Restart'
-        elif self.ids.suspend.state == 'down':
-            self.cmd = 'Suspend'
-        else:
-            self.cmd = 'Log Off'
-        return self.cmd
-
-
-    def get_time(self):
-        if self.ids.set20.state == 'down':
-            self.time = 'set20'
-        elif self.ids.set40.state == 'down':
-            self.time = 'set40'
-        elif self.ids.set60.state == 'down':
-            self.time = 'set60'
-        elif self.ids.set90.state == 'down':
-            self.time = 'set90'
-        else:
-            self.time = 'set120'
-        return self.time
-
-
     # Function called when countdown reaches 0 to execute the selected
     # cmd from the cmd_group togglebuttons
     def initiate_shutdown(self, *args):
@@ -281,8 +310,9 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
             elif self.cmd == 'Suspend':
                 # Compile the cmd string for a suspend
                 final_cmd = 'systemctl suspend'
-            # Else, if none of the above, compile a cmd string for logoff
-            else:
+            # Else, if the Log Off button is down, then
+            elif self.cmd == 'logoff':
+                # Compile the cmd string for log off
                 final_cmd = 'gnome-session-quit --force'
             # Instantiate and open the final popup then start final timer
             self.final_popup = FinalPopup()
@@ -361,15 +391,46 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
     # Function to toggle the status of preset time buttons
     # (20, 40, 60, 90, 120)
+    def toggle_cmd_status(self):
+        # If the Start/Pause button is down (countdown is active), then
+        if self.ids.start_pause.state == 'down':
+            # Then presets are down. To apply a preset, Pause or
+            # Abort the countdown.
+            preset_status = True
+            self.shutdown_btn_disabled = preset_status
+            self.restart_btn_disabled = preset_status
+            self.suspend_btn_disabled = preset_status
+            self.logoff_btn_disabled = preset_status
+        # Otherwise they are available and can be selected at any time
+        else:
+            preset_status = False
+            self.shutdown_btn_disabled = preset_status
+            self.restart_btn_disabled = preset_status
+            self.suspend_btn_disabled = preset_status
+            self.logoff_btn_disabled = preset_status
+
+
+    # Function to toggle the status of preset time buttons
+    # (20, 40, 60, 90, 120)
     def toggle_preset_status(self):
         # If the Start/Pause button is down (countdown is active), then
         if self.ids.start_pause.state == 'down':
             # Then presets are down. To apply a preset, Pause or
             # Abort the countdown.
-            self.preset_disabled = True
+            preset_status = True
+            self.set20_disabled = preset_status
+            self.set40_disabled = preset_status
+            self.set60_disabled = preset_status
+            self.set90_disabled = preset_status
+            self.set120_disabled = preset_status
         # Otherwise they are available and can be selected at any time
         else:
-            self.preset_disabled = False
+            preset_status = False
+            self.set20_disabled = preset_status
+            self.set40_disabled = preset_status
+            self.set60_disabled = preset_status
+            self.set90_disabled = preset_status
+            self.set120_disabled = preset_status
 
 
     # Function to toggle the Start/Pause button state (up or down)
@@ -500,12 +561,11 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
     # Function to reset the entire app
     def reset(self):
-        Animation.cancel_all(self), self.clear_timer(),
+        Animation.cancel_all(self), self.clear_timer(), self.apply_defaults(),
+        self.toggle_preset_status(), self.toggle_cmd_status(),
         self.toggle_start_pause_status(), self.toggle_start_pause_text(),
-        self.toggle_start_pause_state(), self.toggle_preset_status(),
-        self.toggle_sub_time_status(), self.toggle_abort_status(),
-        self.toggle_preset_state()
-
+        self.toggle_start_pause_state(), self.toggle_sub_time_status(),
+        self.toggle_abort_status(), self.toggle_preset_state()
 
 
 # App class that, when called, instatiates the root class
@@ -514,6 +574,7 @@ class LinShutdownApp(App):
     def build(self):
         shutdown_timer = LinShutdownTimer()
         # shutdown_timer.systray.main()
+        shutdown_timer.apply_defaults()
         return shutdown_timer
 
 
