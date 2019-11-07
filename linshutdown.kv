@@ -26,11 +26,12 @@
             id: shutdown
             text: '[u]S[/u]hutdown'
             font_size: root.font_size
-            state: 'down'
+            state: root.shutdown_btn_state
             group: 'cmd'
             markup: True
-            disabled: root.preset_disabled
+            disabled: root.shutdown_btn_disabled
             allow_no_selection: False
+            on_release: root.get_curr_settings(), root.set_app_settings()
         Label:
             size_hint_x: None
             width: root.spacer_width
@@ -38,11 +39,12 @@
             id: restart
             text: '[u]R[/u]estart'
             font_size: root.font_size
-            state: 'normal'
+            state: root.restart_btn_state
             group: 'cmd'
             markup: True
-            disabled: root.preset_disabled
+            disabled: root.restart_btn_disabled
             allow_no_selection: False
+            on_release: root.get_curr_settings(), root.set_app_settings()
         Label:
             size_hint_x: None
             width: root.spacer_width
@@ -50,11 +52,12 @@
             id: suspend
             text: 'Sus[u]p[/u]end'
             font_size: root.font_size
-            state: 'normal'
+            state: root.suspend_btn_state
             group: 'cmd'
             markup: True
-            disabled: root.preset_disabled
+            disabled: root.suspend_btn_disabled
             allow_no_selection: False
+            on_release: root.get_curr_settings(), root.set_app_settings()
         Label:
             size_hint_x: None
             width: root.spacer_width
@@ -62,11 +65,12 @@
             id: logoff
             text: '[u]L[/u]og Off'
             font_size: root.font_size
-            state: 'normal'
+            state: root.logoff_btn_state
             group: 'cmd'
             markup: True
             allow_no_selection: False
-            disabled: root.preset_disabled
+            disabled: root.logoff_btn_disabled
+            on_release: root.get_curr_settings(), root.set_app_settings()
 
     GridLayout:
         rows: 2
@@ -79,11 +83,12 @@
             id: set20
             text: '[u]2[/u]0 min'
             font_size: root.font_size
+            state: root.set20_state
             group: 'preset_duration'
             markup: True
-            disabled: root.preset_disabled
+            disabled: root.set20_disabled
             allow_no_selection: False
-            on_release: root.clear_timer(), root.set_timer( 20 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+            on_release: root.clear_timer(), root.set_timer(20*60), root.toggle_start_pause_status(), root.toggle_sub_time_status(), root.get_curr_settings(), root.set_app_settings() #, root.update_hover_text()
         Label:
             size_hint_x: None
             width: root.spacer_width
@@ -91,11 +96,12 @@
             id: set40
             text: '[u]4[/u]0 min'
             font_size: root.font_size
+            state: root.set40_state
             group: 'preset_duration'
             markup: True
-            disabled: root.preset_disabled
+            disabled: root.set40_disabled
             allow_no_selection: False
-            on_release: root.clear_timer(), root.set_timer( 40 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+            on_release: root.clear_timer(), root.set_timer(40*60), root.toggle_start_pause_status(), root.toggle_sub_time_status(), root.get_curr_settings(), root.set_app_settings() #, root.update_hover_text()
         Label:
             size_hint_x: None
             width: root.spacer_width
@@ -103,11 +109,12 @@
             id: set60
             text: '[u]6[/u]0 min'
             font_size: root.font_size
+            state: root.set60_state
             group: 'preset_duration'
             markup: True
-            disabled: root.preset_disabled
+            disabled: root.set60_disabled
             allow_no_selection: False
-            on_release: root.clear_timer(), root.set_timer( 60 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+            on_release: root.clear_timer(), root.set_timer(60*60), root.toggle_start_pause_status(), root.toggle_sub_time_status(), root.get_curr_settings(), root.set_app_settings() #, root.update_hover_text()
         Label:
             size_hint_x: None
             width: root.spacer_width
@@ -115,11 +122,12 @@
             id: set90
             text: '[u]9[/u]0 min'
             font_size: root.font_size
+            state: root.set90_state
             group: 'preset_duration'
             markup: True
-            disabled: root.preset_disabled
+            disabled: root.set90_disabled
             allow_no_selection: False
-            on_release: root.clear_timer(), root.set_timer( 90 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+            on_release: root.clear_timer(), root.set_timer(90*60), root.toggle_start_pause_status(), root.toggle_sub_time_status(), root.get_curr_settings(), root.set_app_settings() #, root.update_hover_text()
         Label:
             size_hint_x: None
             width: root.spacer_width
@@ -127,11 +135,12 @@
             id: set120
             text: '[u]1[/u]20 min'
             font_size: root.font_size
+            state: root.set120_state
             group: 'preset_duration'
             markup: True
-            disabled: root.preset_disabled
+            disabled: root.set120_disabled
             allow_no_selection: False
-            on_release: root.clear_timer(), root.set_timer( 120 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+            on_release: root.clear_timer(), root.set_timer(120*60), root.toggle_start_pause_status(), root.toggle_sub_time_status(), root.get_curr_settings(), root.set_app_settings() #, root.update_hover_text()
 
     GridLayout:
         rows: 1
@@ -149,7 +158,7 @@
             size_hint: 0.7, 0.4
             markup: True
             disabled: root.sub_time_disabled
-            on_release: root.sub_time( 15 * 60 ), root.toggle_start_pause_status(),  root.toggle_preset_state()#, root.update_hover_text()
+            on_release: root.sub_time(15*60), root.toggle_start_pause_status(), root.toggle_preset_state(), root.toggle_cmd_status() #, root.update_hover_text()
         Label:
             size_hint_x: None
             width: root.spacer_width
@@ -160,7 +169,7 @@
             size_hint: 0.7, 0.4
             disabled: root.add_time_disabled
             markup: True
-            on_release: root.add_time( 15 * 60 ), root.toggle_start_pause_status(), root.toggle_sub_time_status()#, root.update_hover_text()
+            on_release: root.add_time(15*60), root.toggle_start_pause_status(), root.toggle_sub_time_status() #, root.update_hover_text()
         Label:
             size_hint_x: None
             width: 200
@@ -169,7 +178,7 @@
         rows: 1
         cols: 1
         Label:
-            text: "{:02d}:{:02d}:{:02d}".format( int( divmod( divmod( root.countdown, 60 )[ 0 ] , 60 )[ 0 ] ), int( divmod( divmod( root.countdown, 60 )[ 0 ], 60 )[ 1 ] ), int( divmod( root.countdown, 60 )[ 1 ] ) )
+            text: "{:02d}:{:02d}:{:02d}".format(int(divmod(divmod(root.countdown, 60)[0], 60)[0]), int(divmod(divmod(root.countdown, 60)[0], 60)[1]), int(divmod(root.countdown, 60)[1]))
             font_size: 100
 
     BoxLayout:
@@ -181,7 +190,7 @@
             size_hint: 0.7, 0.4
             state: 'normal'
             disabled: root.start_pause_disabled
-            on_release: root.start_stop_timer(), root.toggle_start_pause_text(), root.toggle_start_pause_status(), root.toggle_preset_status(), root.toggle_abort_status(),  root.toggle_preset_state()#, root.update_hover_text()
+            on_release: root.start_stop_timer(), root.toggle_start_pause_text(), root.toggle_start_pause_status(), root.toggle_preset_status(), root.toggle_abort_status(), root.toggle_preset_state(), root.toggle_cmd_status(), root.toggle_keybinding_allowed() #, root.update_hover_text()
         Label:
             size_hint_x: None
             width: root.spacer_width
@@ -196,11 +205,10 @@
             on_release: root.reset()
 
 
-
 <ImminentPopup>:
     canvas.before:
         Color:
-            rgba:  [ 47 / 255., 167 / 255., 212 / 255., 1. ]
+            rgba:  [47/255., 167/255., 212/255., 1.]
         Rectangle:
             pos: self.pos
             size: self.size
@@ -208,7 +216,7 @@
     title_align: 'center'
     size_hint: 0.8, 0.8
     auto_dismiss: False
-    pos_hint: { 'x' : 0.1 , 'y' : 0.1 }
+    pos_hint: {'x': 0.1, 'y': 0.1}
 
     GridLayout:
         cols: 1
@@ -223,7 +231,7 @@
             padding: 15, 25
             size_hint_y: None
             text_size: self.width, None
-            height: self.texture_size[ 1 ]
+            height: self.texture_size[1]
             halign: 'center'
 
         GridLayout:
@@ -231,8 +239,8 @@
             rows: 1
 
             AnchorLayout:
-                anchor_x : 'center'
-                anchor_y : 'bottom'
+                anchor_x: 'center'
+                anchor_y: 'bottom'
                 padding: 20
                 Button:
                     id: yes
@@ -243,8 +251,8 @@
                     on_release: app.root.popup_yes(), app.root.imminent_popup.dismiss()
 
             AnchorLayout:
-                anchor_x : 'center'
-                anchor_y : 'bottom'
+                anchor_x: 'center'
+                anchor_y: 'bottom'
                 padding: 20
                 Button:
                     id: no
@@ -259,16 +267,16 @@
 <FinalPopup>:
     canvas.before:
         Color:
-            rgba:  [ 47 / 255., 167 / 255., 212 / 255., 1. ]
+            rgba:  [47/255., 167/255., 212/255., 1.]
         Rectangle:
             pos: self.pos
             size: self.size
-    title: 'App closing in: {:01d}'.format( int( root.countdown ) )
+    title: 'App closing in: {:01d}'.format(int(root.countdown))
     title_size: 30
     title_align: 'center'
     size_hint: 0.6, 0.6
     auto_dismiss: False
-    pos_hint: { 'x' : 0.2 , 'y' : 0.2 }
+    pos_hint: {'x': 0.2, 'y': 0.2}
 
     BoxLayout:
         Label:
@@ -276,7 +284,7 @@
             font_size: 25
             size_hint_y: None
             text_size: self.width, None
-            height: self.texture_size[ 1 ]
+            height: self.texture_size[1]
             halign: 'center'
             valign: 'middle'
-            pos_hint: { 'x': 0  , 'y' : 0.4 }
+            pos_hint: {'x': 0, 'y': 0.4}

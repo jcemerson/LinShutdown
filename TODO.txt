@@ -1,5 +1,6 @@
-Window Icon (title bar) not showing
-    Syntax appears to be correct. Is this related to Linux and/or Theme?
+Window Icon not showing
+    --Get new Icon file from
+    **Looks like this may not work in  Cinnamon
 
 Test wall command using "systemctl [cmd] [wall command]"
 
