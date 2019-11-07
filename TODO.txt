@@ -1,5 +1,5 @@
-Log-Off command doesn't work
 Window Icon not showing
     --Get new Icon file from
-Keybindings not working
+    **Looks like this may not work in  Cinnamon
+
 Test wall command using "systemctl [cmd] [wall command]"
