@@ -1,12 +1,12 @@
 __author__ = 'WutDuk? https://github.com/jcemerson'
-__date__ = '20191023'
-__version__ = '1.0'
+__date__ = '20191104'
+__version__ = '1.1'
 __description__ = """
     The Linux version of WinShutdown.
 """
 
 
-import sys
+# import sys
 import os
 import json
 import ast
@@ -25,7 +25,6 @@ from kivy.properties import StringProperty
 from kivy.properties import NumericProperty
 from kivy.properties import BooleanProperty
 from kivy.properties import ListProperty
-from kivy.properties import AliasProperty
 from kivy.clock import Clock
 # import tray as systray
 
@@ -104,14 +103,14 @@ class FinalPopup(Popup):
 
 # Main Class defining overall functions of the App
 class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
-    # Define default layout and widget attributes
+    # Define default layout attributes
     font_size = 20
     widget_padding = (25, 10, 25, 10)
     spacer_width = 10
     abort_disabled = BooleanProperty(True)
     abort_background_color = ListProperty([1, 1, 1, 1])
     popup_active = BooleanProperty(False)
-
+    # Define default cmd button attributes
     shutdown_btn_disabled = BooleanProperty(False)
     shutdown_btn_state = StringProperty('normal')
     restart_btn_disabled = BooleanProperty(False)
@@ -120,7 +119,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     suspend_btn_state = StringProperty('normal')
     logoff_btn_disabled = BooleanProperty(False)
     logoff_btn_state = StringProperty('normal')
-
+    # Define default time button attributes
     set20_disabled = BooleanProperty(False)
     set20_state = StringProperty('normal')
     set40_disabled = BooleanProperty(False)
@@ -132,6 +131,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     set120_disabled = BooleanProperty(False)
     set120_state = StringProperty('normal')
     preset_status = BooleanProperty(True)
+    preset_keybinding_enabled = BooleanProperty(True)
 
     sub_time_disabled = BooleanProperty(True)
     add_time_disabled = BooleanProperty(False)
@@ -142,14 +142,14 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     start_pause_disabled = BooleanProperty(True)
 
     # Retrieve default settings if the file exists, else create the file and
-    # set defaults to None.
+    # set defaults
     try:
         with open(user_settings_file, 'r') as f:
             user_settings = ast.literal_eval(f.read())
     except FileNotFoundError:
         user_settings = {
-            "default_cmd": 'shutdown',
-            "default_time": 'set20',
+            'default_cmd': 'shutdown',
+            'default_time': 'set20',
         }
         with open(user_settings_file, 'w+') as f:
             json.dump(user_settings, f, indent=4)
@@ -164,6 +164,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     def apply_defaults(self):
         default_cmd = self.user_settings['default_cmd']
         default_time = self.user_settings['default_time']
+
         if default_cmd == 'shutdown':
             self.shutdown_btn_state = 'down'
         elif default_cmd == 'restart':
@@ -222,7 +223,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
 
     def set_app_settings(self):
-        with open(user_settings_file, 'w+') as f:
+        with open(user_settings_file, 'w') as f:
             json.dump(self.user_settings, f, indent=4)
 
 
@@ -237,7 +238,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        if self.preset_status == True:
+        if self.preset_keybinding_enabled == True:
             # cmd buttons
             if keycode[0] == 115:
                 self.ids.shutdown.trigger_action(0)
@@ -289,6 +290,13 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
                 self.imminent_popup.ids.no.trigger_action(0)
 
 
+    def toggle_keybinding_allowed(self):
+        if self.ids.start_pause.state == 'down':
+            self.preset_keybinding_enabled = False
+        else:
+            self.preset_keybinding_enabled = True
+
+
     # Function called when countdown reaches 0 to execute the selected
     # cmd from the cmd_group togglebuttons
     def initiate_shutdown(self, *args):
@@ -308,7 +316,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
                 final_cmd = 'systemctl reboot'
             # Else, if the Suspend button is down, then
             elif self.cmd == 'Suspend':
-                # Compile the cmd string for a suspend
+                # Compile the cmd string for suspend
                 final_cmd = 'systemctl suspend'
             # Else, if the Log Off button is down, then
             elif self.cmd == 'logoff':
@@ -339,8 +347,6 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
 
     # Function to toggle the '-15 min' button's state
-    # v1.1 introduced the ability to edit a live countdown,
-    # so the state of Start/Pause is no longer checked
     def toggle_sub_time_status(self):
         # If the countdown is less than 15 minutes, then
         if self.countdown < 15 * 60:
@@ -396,18 +402,14 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
         if self.ids.start_pause.state == 'down':
             # Then presets are down. To apply a preset, Pause or
             # Abort the countdown.
-            preset_status = True
-            self.shutdown_btn_disabled = preset_status
-            self.restart_btn_disabled = preset_status
-            self.suspend_btn_disabled = preset_status
-            self.logoff_btn_disabled = preset_status
+            self.preset_status = True
         # Otherwise they are available and can be selected at any time
         else:
-            preset_status = False
-            self.shutdown_btn_disabled = preset_status
-            self.restart_btn_disabled = preset_status
-            self.suspend_btn_disabled = preset_status
-            self.logoff_btn_disabled = preset_status
+            self.preset_status = False
+        self.shutdown_btn_disabled = self.preset_status
+        self.restart_btn_disabled = self.preset_status
+        self.suspend_btn_disabled = self.preset_status
+        self.logoff_btn_disabled = self.preset_status
 
 
     # Function to toggle the status of preset time buttons
@@ -417,20 +419,15 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
         if self.ids.start_pause.state == 'down':
             # Then presets are down. To apply a preset, Pause or
             # Abort the countdown.
-            preset_status = True
-            self.set20_disabled = preset_status
-            self.set40_disabled = preset_status
-            self.set60_disabled = preset_status
-            self.set90_disabled = preset_status
-            self.set120_disabled = preset_status
+            self.preset_status = True
         # Otherwise they are available and can be selected at any time
         else:
-            preset_status = False
-            self.set20_disabled = preset_status
-            self.set40_disabled = preset_status
-            self.set60_disabled = preset_status
-            self.set90_disabled = preset_status
-            self.set120_disabled = preset_status
+            self.preset_status = False
+        self.set20_disabled = self.preset_status
+        self.set40_disabled = self.preset_status
+        self.set60_disabled = self.preset_status
+        self.set90_disabled = self.preset_status
+        self.set120_disabled = self.preset_status
 
 
     # Function to toggle the Start/Pause button state (up or down)
@@ -561,11 +558,13 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
     # Function to reset the entire app
     def reset(self):
-        Animation.cancel_all(self), self.clear_timer(), self.apply_defaults(),
-        self.toggle_preset_status(), self.toggle_cmd_status(),
+        Animation.cancel_all(self), self.clear_timer(),
         self.toggle_start_pause_status(), self.toggle_start_pause_text(),
-        self.toggle_start_pause_state(), self.toggle_sub_time_status(),
-        self.toggle_abort_status(), self.toggle_preset_state()
+        self.toggle_start_pause_state(), self.toggle_preset_status(),
+        self.toggle_cmd_status(), self.toggle_sub_time_status(),
+        self.toggle_abort_status(), self.toggle_keybinding_allowed(),
+        self.apply_defaults()
+        #, self.toggle_preset_state()
 
 
 # App class that, when called, instatiates the root class
