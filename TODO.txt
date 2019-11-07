@@ -3,3 +3,10 @@ Window Icon not showing
     **Looks like this may not work in  Cinnamon
 
 Test wall command using "systemctl [cmd] [wall command]"
+
+Add config file and UI options
+
+Windows SysTray doesn't work (obviously), and new SysTray using gi.repository.AppIndicator3 "freezes" the app prior to loading the UI.
+    Need to find suitable SysTray functionality.
+
+CLEAN UP CODE! Run linter and follow suggestions.
