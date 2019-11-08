@@ -395,12 +395,12 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
             self.abort_background_color = [1, 1, 1, 1]
 
 
-    # Function to toggle the status of preset time buttons
+    # Function to toggle the status of preset cmd buttons
     # (20, 40, 60, 90, 120)
     def toggle_cmd_status(self):
         # If the Start/Pause button is down (countdown is active), then
         if self.ids.start_pause.state == 'down':
-            # Then presets are down. To apply a preset, Pause or
+            # Then preset cmd buttons are down. To apply a preset, Pause or
             # Abort the countdown.
             self.preset_status = True
         # Otherwise they are available and can be selected at any time
@@ -417,7 +417,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     def toggle_preset_status(self):
         # If the Start/Pause button is down (countdown is active), then
         if self.ids.start_pause.state == 'down':
-            # Then presets are down. To apply a preset, Pause or
+            # Then preset time buttons are down. To apply a preset, Pause or
             # Abort the countdown.
             self.preset_status = True
         # Otherwise they are available and can be selected at any time
@@ -558,11 +558,16 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
     # Function to reset the entire app
     def reset(self):
-        Animation.cancel_all(self), self.clear_timer(),
-        self.toggle_start_pause_status(), self.toggle_start_pause_text(),
-        self.toggle_start_pause_state(), self.toggle_preset_status(),
-        self.toggle_cmd_status(), self.toggle_sub_time_status(),
-        self.toggle_abort_status(), self.toggle_keybinding_allowed(),
+        Animation.cancel_all(self),
+        self.clear_timer(),
+        self.toggle_start_pause_status(),
+        self.toggle_start_pause_text(),
+        self.toggle_start_pause_state(),
+        self.toggle_preset_status(),
+        self.toggle_cmd_status(),
+        self.toggle_sub_time_status(),
+        self.toggle_abort_status(),
+        self.toggle_keybinding_allowed(),
         self.apply_defaults()
         #, self.toggle_preset_state()
 
