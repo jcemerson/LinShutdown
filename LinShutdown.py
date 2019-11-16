@@ -74,7 +74,6 @@ user_settings_file = file_path + '/' + filename
 
 # Class defining popup presented when User forces countdown to 0
 class ImminentPopup(Popup):
-
     label_text = StringProperty('')
 
     def __init__(self, cmd):
@@ -86,7 +85,6 @@ class ImminentPopup(Popup):
 # Class defining popup presented when final command is sent prior to the
 # App auto-closing
 class FinalPopup(Popup):
-
     countdown = NumericProperty(5.9)
 
     def __init__(self):
