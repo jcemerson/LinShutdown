@@ -238,7 +238,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
         self._keyboard.unbind(on_key_down=self._on_keyboard_down)
         self._keyboard = None
 
-
+    # See \kivy\core\window\__init__.py for keycode details
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
         if self.preset_keybinding_enabled == True:
             # cmd buttons
@@ -302,22 +302,23 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     # Method called when countdown reaches 0 to execute the selected
     # cmd from the cmd_group togglebuttons
     def initiate_shutdown(self, *args):
+        cmd = self.cmd
         # If the Start/Pause button is down (should say 'Pause') and the countdown is at 0, then
         if self.countdown == 0:
             # If the Shutdown button is down, then
-            if self.cmd == 'Shutdown':
+            if cmd == 'Shutdown':
                 # Compile the cmd string for a shutdown
                 self.final_cmd = 'systemctl poweroff'
             # Else, if the Restart button is down, then
-            elif self.cmd == 'Restart':
+            elif cmd == 'Restart':
                 # Compile the cmd string for a restart
                 self.final_cmd = 'systemctl reboot'
             # Else, if the Suspend button is down, then
-            elif self.cmd == 'Suspend':
+            elif cmd == 'Suspend':
                 # Compile the cmd string for suspend
                 self.final_cmd = 'systemctl suspend'
             # Else, if the Log Off button is down, then
-            elif self.cmd == 'logoff':
+            elif cmd == 'logoff':
                 # Compile the cmd string for log off
                 self.final_cmd = 'gnome-session-quit --force'
             # Instantiate and open the final popup then start final countdown
@@ -361,7 +362,7 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
             self.sub_time_disabled = False
 
 
-    # Fucntion to toggle the '+ 15 min' button status
+    # Method to toggle the '+ 15 min' button status
     def toggle_add_time_status(self):
         # If '+ 15 min' button is not disabled, set to disabled
         if self.add_time_disabled == False:
@@ -475,8 +476,6 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
 
     def start_stop_timer(self):
-        # Get current cmd value
-        self.get_cmd()
         # Cancel any current animation in progress
         Animation.cancel_all(self)
         # Define the rules for Animation; i.e., (where we are going, where
@@ -488,6 +487,8 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
         # on_release of Start/Pause button, if the down and there is still
         # time on the clock, then
         if self.ids.start_pause.state == 'down' and self.countdown > 0:
+            # Get current cmd value
+            self.get_cmd()
             # On completion of the countdown, call method to initiate the
             # shutdown process
             self.anim.bind(on_complete=self.initiate_shutdown)
