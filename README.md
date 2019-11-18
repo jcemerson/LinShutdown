@@ -26,3 +26,5 @@ or fork the repository and submit your own pull requests..
 Also, please feel free to help me grow and perfect this craft by
 offering constructive criticism and guidance toward improving the
 existing codebase.
+
+![LinShutdown Screenshot](https://github.com/jcemerson/LinShutdown/blob/master/Images/screenshot_LinShutdown_11-17-19.png)
