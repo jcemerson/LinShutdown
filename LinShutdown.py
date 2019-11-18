@@ -20,7 +20,7 @@
 
     As such, this app's current functionality is limited in scope and
     is likely to not be all things everybody ever wanted in such a
-    tool, or anything else it was never meant to be.
+    tool, nor anything else it was never meant to be.
 
     That said, I do intend to add enhacements with time to offer
     increased flexibility and options for different use-cases. Feel
@@ -98,7 +98,7 @@ user_settings_file = os.path.join(file_path, filename)
 
 class ImminentPopup(Popup):
     """
-    A popup presented when the user forces the countdown to 0.
+    A popup presented when the user forces the countdown to 00:00:00.
 
     The user will be warned that they are about to force the selected
     command to be executed and asked to confirm this action by
@@ -136,12 +136,18 @@ class FinalPopup(Popup):
     def start_final_timer(self):
         """
         Starts the countdown to cmd execution and App auto-closing.
-
         """
+        # Cancel any active animation
         Animation.cancel_all(self)
+        # Define the Animation; where we're going, where we're coming from.
         self.anim = Animation(countdown=0, duration=self.countdown)
+        # Bring minimized and/or hidden window front-and-center.
+        App.get_running_app().root._show_app_window()
+        # Execute final command.
         self.anim.bind(on_complete=App.get_running_app().root.exec_cmd)
+        # Stop the App.
         self.anim.bind(on_complete=App.get_running_app().stop)
+        # Close the system tray icon (current only supported in Windows).
         # self.anim.bind(on_complete=App.get_running_app().root.close_systray)
         self.anim.start(self)
 
@@ -207,8 +213,13 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
 
     def __init__(self):
         super(LinShutdownTimer, self).__init__()
+        # Instantiate Window object
+        self._app_window = Window
         # Obtain instance of keyboard and bind key-press event.
-        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+        self._keyboard = self._app_window.request_keyboard(
+            self._keyboard_closed,
+            self,
+        )
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
 
 
@@ -430,6 +441,14 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
             self.final_popup.start_final_timer()
 
 
+    def _show_app_window(self):
+        """
+        Bring minimized and/or hidden App window to the forefront.
+        """
+        self._app_window.show()
+        self._app_window.raise_window()
+
+
     def exec_cmd(self, *args):
         """
         Send final cmd to command shell.
@@ -542,7 +561,6 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
     def toggle_preset_status(self):
         """
         Enable/Disable preset_duration (time) buttons:
-
             * 20
             * 40
             * 60
@@ -732,7 +750,6 @@ class LinShutdownTimer(GridLayout, ToggleButtonBehavior):
         self.toggle_abort_status(),
         self.toggle_keybinding_allowed(),
         self.apply_defaults()
-        #, self.reset_preset_state()
 
 
 class LinShutdownApp(App):
