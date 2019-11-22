@@ -2,9 +2,10 @@
 # Created by https://www.gitignore.io/api/linux,python,windows
 # Edit at https://www.gitignore.io/?templates=linux,python,windows
 
-### Local Files ###
+### Local Files and Directories ###
 /Testing*
 /Testing/*
+.pylintrc
 
 ### Linux ###
 *~
@@ -156,4 +157,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/linux,python,windows
-
